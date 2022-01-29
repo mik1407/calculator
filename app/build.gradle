@@ -1,0 +1,71 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
+
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+def keystoreProperties = new Properties()
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
+android {
+    compileSdkVersion 30
+
+    defaultConfig {
+        applicationId "net.pubnative.hybidstandalonedemo"
+        minSdkVersion 21
+        targetSdkVersion 30
+        versionCode 45
+        versionName "5.7.0"
+        setProperty("archivesBaseName", "calculator")
+    }
+
+    signingConfigs {
+        if (keystorePropertiesFile.exists()) {
+            release {
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+                storeFile file(keystoreProperties['storeFile'])
+                storePassword keystoreProperties['storePassword']
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            if (keystorePropertiesFile.exists()) {
+                signingConfig signingConfigs.release
+            }
+        }
+    }
+
+    flavorDimensions "variants"
+    productFlavors {
+        core {}
+        fdroid {}
+    }
+
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+    }
+
+    lintOptions {
+        checkReleaseBuilds false
+        abortOnError false
+    }
+}
+
+dependencies {
+    implementation 'com.github.SimpleMobileTools:Simple-Commons:9cb42cbf35'
+    implementation 'me.grantland:autofittextview:0.2.1'
+    implementation 'net.objecthunter:exp4j:0.4.8'
+
+    implementation 'net.pubnative:hybid.sdk:2.4.7'
+
+    kapt 'androidx.room:room-compiler:2.3.0'
+    implementation 'androidx.room:room-runtime:2.3.0'
+    annotationProcessor 'androidx.room:room-compiler:2.3.0'
+}
